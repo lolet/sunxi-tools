@@ -227,11 +227,15 @@ static int decompile_section(void *bin, size_t bin_size,
 
 	size = bin_size - 4 * section->offset;
 
-	if ((section->length <= 0) ||
+	if ((section->length < 0) ||
 	    (section->length > (size / (int)sizeof(struct script_bin_entry)))) {
-		pr_err("Malformed data: invalid section length: %d\n",
+		pr_err("Malformed data: invalid section (%s) length: %d\n", section->name,
 		       section->length);
 		return 0;
+	}
+	else if (section->length == 0) {
+		pr_info("Omitting empty section: %s\n", section->name);
+		return 1;
 	}
 
 	if ((s = script_section_new(script, section->name)) == NULL)
